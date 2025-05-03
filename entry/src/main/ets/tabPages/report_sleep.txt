@@ -1,0 +1,578 @@
+// report_sleep.ts
+import { DataService } from '../data_base/data_base';
+import { ChartDateClass } from '../entity/chart_date_class';
+import { SleepClass } from '../entity/sleep_class';
+import { AppStorageV2 } from '@kit.ArkUI';
+
+
+interface LegendItems{
+  color: string;
+  text: string;
+}
+
+
+@Entry
+@Component
+struct Report_sleep {
+  @State currentIndex: number = 0
+  @State loadingProgress: number = 0
+  @State isLoading: boolean = true;
+  @State animationProgress: number = 0; // 新增，控制柱状图动画进度
+
+  private legend_items: LegendItems[]= [
+    { color: '#1976D2', text: '深睡' },
+    { color: '#64B5F6', text: '浅睡' },
+    { color: '#ffaf3b', text: 'REM' }
+  ]
+
+  private settings: RenderingContextSettings = new RenderingContextSettings(true)
+  private context_canvas_bar: CanvasRenderingContext2D = new CanvasRenderingContext2D(this.settings)
+  private context_canvas_line: CanvasRenderingContext2D = new CanvasRenderingContext2D(this.settings)
+  private monthAbbreviations: string[] = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  @State sleep_data_set: ChartDateClass =
+    new ChartDateClass('sleep', '睡眠周报', '#2196F3', new Array(7).fill(0))
+  context: Context = getContext(this) as Context
+  data_service: DataService = AppStorageV2.connect(DataService, "data_service", () => new DataService(this.context))!
+  @State today: string = new Date().toISOString().split('T')[0];
+  @StorageLink('sleep_info') sleep_info: SleepClass = new SleepClass()
+  @State sleep_info_week: SleepClass[] = []
+
+  async aboutToAppear(): Promise<void> {
+    this.isLoading = true
+    console.info('[sleep] 开始获取当天数据')
+    this.sleep_info = await this.data_service.sleep_query_data(this.today)
+    if (this.sleep_info.date === 'default') {
+      console.info('[sleep] 插入默认数据')
+      await this.data_service.sleep_insert_data(this.today)
+      this.sleep_info = await this.data_service.sleep_query_data(this.today)
+    }
+
+    console.info('[sleep] 开始获取周数据')
+    this.sleep_info_week = await this.data_service.sleep_query_data_week(this.today)
+
+    // 初始化图表数据（总睡眠时长）
+    this.sleep_data_set.data = this.sleep_info_week.map(item => item.sleep)
+    console.info('[sleep] 数据初始化完成')
+
+
+
+
+
+    // const date = new Date(this.today);
+    // let formattedDate = date.toISOString().split('T')[0];
+    //
+    // let s:SleepClass=new SleepClass(formattedDate,360,1,150,170,40)
+    // this.data_service.sleep_update_data(formattedDate,s)
+
+    // date.setDate(date.getDate() - 1);
+    // formattedDate = date.toISOString().split('T')[0];
+    // s=new SleepClass(formattedDate,480,2,200,200,80)
+    // this.data_service.sleep_update_data(formattedDate,s)
+    //
+    // date.setDate(date.getDate() - 1);
+    // formattedDate = date.toISOString().split('T')[0];
+    // s=new SleepClass(formattedDate,300,5,100,150,50)
+    // this.data_service.sleep_update_data(formattedDate,s)
+    //
+    // date.setDate(date.getDate() - 1);
+    // formattedDate = date.toISOString().split('T')[0];
+    // s=new SleepClass(formattedDate,400,2,200,170,30)
+    // this.data_service.sleep_update_data(formattedDate,s)
+    //
+    // date.setDate(date.getDate() - 1);
+    // formattedDate = date.toISOString().split('T')[0];
+    // s=new SleepClass(formattedDate,420,1,250,150,20)
+    // this.data_service.sleep_update_data(formattedDate,s)
+
+    // date.setDate(date.getDate() - 1);
+    // formattedDate = date.toISOString().split('T')[0];
+    // s=new SleepClass(formattedDate,390,4,100,250,40)
+    // this.data_service.sleep_update_data(formattedDate,s)
+    //
+    // date.setDate(date.getDate() - 1);
+    // formattedDate = date.toISOString().split('T')[0];
+    // s=new SleepClass(formattedDate,420,2,150,200,70)
+    // this.data_service.sleep_update_data(formattedDate,s)
+
+
+    this.isLoading = false
+
+    this.startAnimation()
+  }
+
+  build() {
+    if (this.isLoading) {
+      this.ProgressLoading()
+    } else {
+      Scroll() {
+        Column() {
+          // 标题
+          Text(this.sleep_data_set.title)
+            .fontSize(24)
+            .margin({ bottom: 15 })
+            .fontColor(this.sleep_data_set.color)
+            .fontWeight(FontWeight.Bold)
+
+          // 图表切换
+          Swiper() {
+            // 分层柱状图
+            Canvas(this.context_canvas_bar)
+              .width('100%')
+              .height(400)
+              .backgroundColor(Color.White)
+              .borderRadius(12)
+              .onReady(() => this.drawChart('bar'))
+
+            // 折线图
+            Canvas(this.context_canvas_line)
+              .width('100%')
+              .height(400)
+              .backgroundColor(Color.White)
+              .borderRadius(12)
+              .onReady(() => this.drawChart('line'))
+          }
+          .indicatorStyle({
+            color: '#dbdbdb',
+            selectedColor: '#2196F3',
+            size: 8
+          })
+          .index(this.currentIndex)
+          .onChange((index: number) => this.currentIndex = index)
+          .margin({ bottom: 20 })
+
+          // 数据明细
+          Column() {
+            ForEach(this.sleep_info_week.slice().reverse(), (item: SleepClass, index: number) => {
+              Row() {
+                // 图标区域
+                Image($r('app.media.sleep'))
+                  .width('25%')
+                  .margin({ right: 0, left: -20 })
+
+                // 数据区域
+                Stack() {
+                  Row() {
+                    // 深睡
+                    Column() {
+                      Text('深睡')
+                        .fontSize(18)
+                        .fontColor('#666')
+                      Text(`${this.formatSleepTime(item.deep)}`)
+                        .fontSize(18)
+                        .fontColor('#1976D2')
+                        .margin({ right: 8 })
+                        .fontWeight(FontWeight.Bold)
+                    }
+                    .layoutWeight(1)
+
+                    // 浅睡
+                    Column() {
+                      Text('浅睡')
+                        .fontSize(18)
+                        .fontColor('#666')
+                      Text(`${this.formatSleepTime(item.light)}`)
+                        .fontSize(18)
+                        .fontColor('#64B5F6')
+                        .margin({ right: 8 })
+                        .fontWeight(FontWeight.Bold)
+                    }
+                    .layoutWeight(1)
+
+                    // 苏醒
+                    Column() {
+                      Text('苏醒')
+                        .fontSize(18)
+                        .fontColor('#666')
+                      Text(`${item.wake}次`)
+                        .fontSize(18)
+                        .fontColor('#F44336')
+                        .margin({ right: 8 })
+                        .fontWeight(FontWeight.Bold)
+                    }
+                    .layoutWeight(1)
+
+                    // REM
+                    Column() {
+                      Text('REM')
+                        .fontSize(18)
+                        .fontColor('#666')
+
+                      Text(`${this.formatSleepTime(item.rem)}`)
+                        .fontSize(18)
+                        .fontColor('#9C27B0')
+                        .fontWeight(FontWeight.Bold)
+                    }
+                    .layoutWeight(1)
+
+                  }
+                  .width('100%')
+
+                  // 日期
+                  Text(this.formatDisplayDate(item.date))
+                    .fontSize(14)
+                    .fontColor('#999')
+                    .position({ x: '70%', y: '5%' }) // 关键定位属性
+                }
+                // .backgroundColor(Color.Pink)
+                .width('75%')
+                .height('100%')
+              }
+              .height(90)
+              // .padding(10)
+              .backgroundColor(Color.White)
+              .borderRadius(8)
+              // .shadow({ radius: 2, color: '#10000000', offsetX: 1, offsetY: 1 })
+
+              if(index != 6) Divider().strokeWidth(0.5).color('#eee')
+            })
+          }
+          // .padding(10)
+          .backgroundColor(Color.White)
+          .borderRadius(12)
+          .margin({ bottom: 20 })
+        }
+        .width('100%')
+        .padding(10)
+      }
+      .scrollBar(BarState.Off)
+      .expandSafeArea([SafeAreaType.SYSTEM],[SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
+      .backgroundColor('#ececec')
+    }
+  }
+
+  // 格式化睡眠时间
+  private formatSleepTime(minutes: number): string {
+    const hours = Math.floor(minutes / 60)
+    const mins = minutes % 60
+    return `${hours}h${mins.toString().padStart(2, '0')}m`
+  }
+
+  // 格式化显示日期
+  private formatDisplayDate(dateStr: string): string {
+    const date = new Date(dateStr);
+    const month = this.monthAbbreviations[date.getMonth()];
+    return `${month} ${date.getDate()}, ${date.getFullYear()}`;
+  }
+
+  // 绘制图表
+  private drawChart(type: string) {
+    const ctx = type === 'bar' ? this.context_canvas_bar : this.context_canvas_line
+    const canvasWidth = ctx.width
+    const canvasHeight = ctx.height-30
+    console.info(`[123]   Width=${canvasWidth}     Height${canvasHeight}  `)
+    const maxValue = Math.max(...this.sleep_data_set.data)
+
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight)
+    this.drawMonthLabel(ctx, canvasWidth,type)
+
+    if (type === 'bar') {
+      this.drawStackedBarChart(ctx, canvasWidth, canvasHeight,maxValue)
+    } else {
+      this.drawLineChart(ctx, canvasWidth, canvasHeight, maxValue)
+    }
+
+
+    this.drawDataLabels(ctx, canvasWidth, canvasHeight, maxValue,type)
+    this.drawDateLabels(ctx, canvasWidth, canvasHeight)
+  }
+
+  // 分层柱状图绘制
+  private drawStackedBarChart(ctx: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number, maxValue: number) {
+    const margin = 30
+    const totalBars = 7
+    const availableWidth = canvasWidth - margin * 2
+    const barWidth = Math.min(40, availableWidth / (totalBars * 1.5))
+    const spacing = barWidth / 2
+    const verticalPadding = 40
+    // const remColor = '#9C27B0' // 新增REM颜色
+
+    this.sleep_info_week.forEach((item, i) => {
+      const total = item.sleep || 1 // 避免除零错误
+      const validTotal = Math.max(total, item.deep + item.light + item.rem) // 数据校验
+
+      // 计算各阶段比例
+      const deepRatio = item.deep / validTotal
+      const lightRatio = item.light / validTotal
+      const remRatio = item.rem / validTotal
+
+      const x = margin + i * (barWidth + spacing)
+      const totalHeight = (validTotal / maxValue) * (canvasHeight - verticalPadding * 2)
+      const animatedHeight = (this.animationProgress / 100) * totalHeight
+
+      // 绘制顺序：深睡 -> 浅睡 -> REM
+      // 深睡部分
+      ctx.fillStyle = '#1976D2'
+      ctx.fillRect(
+        x,
+        canvasHeight - (verticalPadding-25) - animatedHeight  * deepRatio,
+        barWidth,
+        animatedHeight *deepRatio
+      )
+
+      // 浅睡部分
+      ctx.fillStyle = '#64B5F6'
+      ctx.fillRect(
+        x,
+        canvasHeight - (verticalPadding-25) - animatedHeight * (deepRatio + lightRatio),
+        barWidth,
+        animatedHeight * lightRatio
+      )
+
+      // REM部分
+      ctx.fillStyle = '#ffaf3b'
+      ctx.fillRect(
+        x,
+        canvasHeight - (verticalPadding-25) - animatedHeight * (deepRatio + lightRatio + remRatio),
+        barWidth,
+        animatedHeight *remRatio
+      )
+
+      // 添加调试日志
+      console.info(`[睡眠构成] 日期：${item.date} 深睡：${(deepRatio*100).toFixed(1)}% ` +
+        `浅睡：${(lightRatio*100).toFixed(1)}% REM：${(remRatio*100).toFixed(1)}%`)
+    })
+
+    // 添加图例说明
+    this.drawLegend(ctx, canvasWidth)
+  }
+
+  // 绘制图例
+  private drawLegend(ctx: CanvasRenderingContext2D, canvasWidth: number) {
+    ctx.font = '12px "HarmonyOS Sans"'
+
+
+    this.legend_items.forEach((item, index) => {
+      const x = canvasWidth - 180 + index * 60
+      const y = 30
+
+      // 颜色方块
+      ctx.fillStyle = item.color
+      ctx.fillRect(x, y, 12, 12)
+
+      // 文字说明
+      ctx.fillStyle = '#333'
+      ctx.textAlign = 'left'
+      const baseSize = canvasWidth / 20;
+      const fontSize = Math.max(48, Math.min(72, baseSize * 3));
+      ctx.font = `${fontSize}px \"HarmonyOS Sans\"`;
+      ctx.fillText(item.text, x + 16, y )
+    })
+  }
+
+  // 折线图绘制
+  private drawLineChart(ctx: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number, maxValue: number) {
+    const margin = 30
+    const verticalPadding = 40
+
+
+    const chartMaxHeight = canvasHeight - verticalPadding * 2
+
+    const availableWidth_bar = canvasWidth - margin * 2
+    const barWidth = availableWidth_bar / (7 * 1.5) // 按比例计算
+
+    const availableWidth = canvasWidth - margin * 2-barWidth*1.5
+    const pointSpacing = availableWidth / 6
+
+    const spacing = barWidth / 2
+
+    // 第一步：绘制连接线
+    ctx.beginPath()
+    ctx.strokeStyle = '#2196F3'
+    ctx.lineWidth = 4
+    ctx.lineJoin = 'round'
+
+    this.sleep_info_week.forEach((item, i) => {
+      const total = Math.max(item.sleep, item.deep + item.light + item.rem)
+      const yPos = canvasHeight - (verticalPadding-25) - (total / maxValue) * chartMaxHeight
+      const x = margin + i * pointSpacing+ barWidth/2
+      const y = yPos+5
+
+      if (i === 0) {
+        ctx.moveTo(x, y)
+      } else {
+        ctx.lineTo(x, y)
+      }
+    })
+    ctx.stroke() // 必须先描边路径
+
+    // 第二步：单独绘制数据点
+    this.sleep_info_week.forEach((item, i) => {
+      const total = Math.max(item.sleep, item.deep + item.light + item.rem)
+      const yPos = canvasHeight - (verticalPadding-25) - (total / maxValue) * chartMaxHeight
+      const x = margin + i * pointSpacing+ barWidth/2
+      const y = yPos+5
+
+      // 外层圆环
+      ctx.beginPath()
+      ctx.arc(x, y, 6, 0, Math.PI * 2)
+      ctx.fillStyle = '#2196F3'
+      ctx.fill()
+
+      // 内层白点
+      ctx.beginPath()
+      ctx.arc(x, y, 4, 0, Math.PI * 2)
+      ctx.fillStyle = Color.White
+      ctx.fill()
+    })
+  }
+
+  // 数据标签
+  // 数据标签（支持分层显示）
+  private drawDataLabels(ctx: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number,maxValue: number,type:string) {
+    const margin = 30
+    const totalBars = 7
+    const availableWidth = canvasWidth - margin * 2
+    const barWidth = Math.min(40, availableWidth / (totalBars * 1.5))
+    const spacing = barWidth / 2
+    const verticalPadding = 40
+
+    // 动态字体设置
+    const baseFontSize = canvasWidth / 35
+    const mainFontSize = Math.min(28, Math.max(18, baseFontSize))
+    const ratioFontSize = mainFontSize * 0.8
+
+    ctx.textBaseline = 'middle' // 改为中线对齐
+    ctx.textAlign = 'center'
+
+    this.sleep_info_week.forEach((item, i) => {
+      const x = margin + i * (barWidth + spacing) + barWidth / 2
+      const total = item.sleep || 1
+      const validTotal = Math.max(total, item.deep + item.light + item.rem)
+
+      // 重新计算各层高度（与drawStackedBarChart保持一致）
+      const deepRatio = item.deep / validTotal
+      const lightRatio = item.light / validTotal
+      const remRatio = item.rem / validTotal
+      const totalHeight = (validTotal / maxValue) * (canvasHeight - verticalPadding * 2)
+
+      // 计算各层中间位置
+      const deepY = canvasHeight - (verticalPadding-25) - totalHeight * deepRatio/2
+      const lightY = canvasHeight - (verticalPadding-25) - totalHeight*(deepRatio + lightRatio/2)
+      const remY = canvasHeight - (verticalPadding-25) - totalHeight*(deepRatio + lightRatio + remRatio/2)
+      const totalY = canvasHeight - (verticalPadding-25) - totalHeight - 10 // 总时长在顶部
+
+
+      const baseSize = canvasWidth / 20;
+      const fontSize = Math.max(48, Math.min(72, baseSize * 3));
+      ctx.font = `bold ${fontSize}px \"HarmonyOS Sans\"`;
+      if(type==='bar')
+      { // 绘制深睡标签
+
+        ctx.fillStyle = '#333' // 白色文字提高对比度
+        ctx.fillText(`${Math.round(deepRatio * 100)}%`, x, deepY)
+
+        // 绘制浅睡标签
+        ctx.fillStyle = '#333' // 深色文字适配浅蓝背景
+        ctx.fillText(`${Math.round(lightRatio * 100)}%`, x, lightY)
+
+        // 绘制REM标签
+        ctx.fillStyle = '#333'
+        ctx.fillText(`${Math.round(remRatio * 100)}%`, x, remY)
+      }
+
+      // 绘制总时长
+      ctx.font = `bold ${fontSize}px \"HarmonyOS Sans\"`;
+      ctx.fillStyle =' #5857cd'
+      ctx.fillText(
+        `${Math.floor(validTotal/60)}h${validTotal%60}m`,
+        x,
+        totalY
+      )
+    })
+  }
+
+  // 日期标签
+  private drawDateLabels(ctx: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number) {
+    const margin = 30
+    const totalBars = 7
+    const availableWidth = canvasWidth - margin * 2
+    const barWidth = Math.min(40, availableWidth / (totalBars * 1.5))
+    const spacing = barWidth / 2
+    const verticalPadding = 40 // 与柱状图绘制参数保持一致
+
+    // 动态字体设置
+    const baseSize = canvasWidth / 20;
+    const fontSize = Math.max(48, Math.min(72, baseSize * 3));
+    ctx.font = `${fontSize}px \"HarmonyOS Sans\"`;
+    ctx.fillStyle = Color.Black // 使用中性灰提升可读性
+    ctx.textBaseline = 'top' // 文字从Y坐标顶部开始绘制
+    ctx.textAlign = 'center'
+
+    this.sleep_info_week.forEach((item, i) => {
+      const x = margin + i * (barWidth + spacing) + barWidth / 2
+      const date = new Date(item.date)
+
+      // 计算标签位置（柱底下方10px）
+      const labelY = canvasHeight - (verticalPadding-25)   // verticalPadding-25是柱底位置
+
+      // 格式化日期（处理前导零）
+      const day = date.getDate().toString().padStart(2, ' ')
+      const month = this.monthAbbreviations[date.getMonth()]
+
+      // 绘制日期标签
+      ctx.fillText(`${day}`, x, labelY)      // 日期（居中对齐）
+      // ctx.fillText(`${month}`, x, labelY + 18) // 月份（居中对齐）
+    })
+  }
+
+  // 月份标签
+  private drawMonthLabel(ctx: CanvasRenderingContext2D, canvasWidth: number,type:string) {
+    if (this.sleep_info_week.length === 0) return
+
+    const lastDate = new Date(this.sleep_info_week[6].date)
+    const month = this.monthAbbreviations[lastDate.getMonth()]
+    const year = lastDate.getFullYear()
+
+    ctx.font = 'bold 90px "HarmonyOS Sans"';
+    ctx.fillStyle = Color.Black;
+    ctx.textAlign = 'center'
+    if(type==='bar')ctx.fillText(`${month} ${year}`, canvasWidth / 2, 0)
+    else ctx.fillText(`${month} ${year}`, canvasWidth / 2, 25)
+
+  }
+
+  // 加载动画
+  @Builder
+  ProgressLoading() {
+    Column() {
+      Progress({ value: this.loadingProgress, total: 100 })
+        .width(80)
+        .height(80)
+        .color(Color.Blue)
+
+      Text(`${Math.floor(this.loadingProgress)}%`)
+        .fontSize(18)
+        .margin({ top: 12 })
+    }
+    .onAppear(() => {
+      animateTo({ duration: 1000 }, () => this.loadingProgress = 100)
+    })
+  }
+
+
+
+  // 启动动画
+  private startAnimation() {
+    animateTo({ duration: 300 }, () => {
+      this.loadingProgress = 100;  // 更新进度条为100%
+      this.animateChartGrowth();   // 启动柱状图动画
+    });
+  }
+
+  // 控制柱状图逐渐增长
+  private animateChartGrowth() {
+    const maxValue = Math.max(...this.sleep_data_set.data);
+    const animationInterval = setInterval(() => {
+      this.animationProgress += 1; // 每次更新进度
+      if (this.animationProgress >= 100) {
+        clearInterval(animationInterval); // 动画结束时停止更新
+        this.animationProgress = 100;
+      }
+      // 重新绘制柱状图
+      this.drawChart('bar');
+    }, 5); // 每5ms更新一次柱状图
+  }
+
+
+}

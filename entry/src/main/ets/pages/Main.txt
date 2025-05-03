@@ -1,0 +1,73 @@
+import { tabData } from "../entity/tab_class"
+import { TabClass } from "../entity/tab_class"
+import { Data_page } from "../tabPages/DataPage";
+import { Health } from "../tabPages/Health";
+import { Mine1 } from "../tabPages/Mine1";
+import { AppStorageV2 } from "@kit.ArkUI";
+
+
+@Entry
+@Component
+struct Main_page {
+  @State message: string = 'Hello World';
+
+  @StorageLink('activeTabIndex') activeTabIndex: number = 0
+
+  @State current_index:number=0
+
+  tabData:TabClass[]=tabData
+
+
+  @Builder get_TabBar(item:TabClass,index:number){
+    Column({space:5}){
+      Image(item.icon)
+        .width(24)
+        .fillColor(this.current_index === index ? '#63AAAA' : '#7A7A7A ')
+      Text(item.text)
+        .fontSize(14)
+        .fontColor(this.current_index === index ? '#63AAAA' : '#7A7A7A ')
+        .fontWeight(FontWeight.Bold)
+    }
+  }
+  @Builder get_TabContent(index:number){
+    // console.info('index',index)
+    if(index===0) Health()
+    else if(index===1) Data_page()
+    else if(index===2) Mine1()
+  }
+
+
+
+  build() {
+    RelativeContainer() {
+      Tabs({barPosition:BarPosition.End}){
+        ForEach(this.tabData,(item:TabClass,index:number)=>{
+          TabContent(){
+            // if(this.current_index===0) Health()
+            // else if(this.current_index===1) Data_page()
+            // else if(this.current_index===2) Mine1()
+            this.get_TabContent(index)
+            // if(index===0) Health()
+            // else if(index===1) Data_page()
+            // else if(index===2) Mine1()
+          }
+          .tabBar(this.get_TabBar(item,index))
+          .expandSafeArea([SafeAreaType.SYSTEM],[SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
+          .backgroundColor('#ececec')
+        })
+      }
+      .onChange((index:number)=>{
+        this.current_index=index
+        console.info('current_index',this.current_index)
+        // AppStorageV2.set<number>('activeTabIndex', index)
+        this.activeTabIndex=index
+      })
+
+      .backgroundColor('#dedede')
+      .expandSafeArea([SafeAreaType.SYSTEM],[SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
+
+    }
+    .height('100%')
+    .width('100%')
+  }
+}

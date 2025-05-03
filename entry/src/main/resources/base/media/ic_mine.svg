@@ -1,0 +1,25 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg t="1704384328374"
+     class="icon"
+     viewBox="0 0 1027 1024"
+     version="1.1"
+     xmlns="http://www.w3.org/2000/svg"
+     p-id="60752"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="32.09375"
+     height="32">
+    <!-- 修改后的路径 -->
+    <path
+            d="M513.375 533.099c-131.96 0-239.312-105.669-239.312-235.554S381.415 62.05 513.375 62.05s239.332 105.669 239.332 235.544-107.361 235.504-239.332 235.504z"
+            fill="currentColor"
+            stroke="currentColor"
+            stroke-width="20"
+            p-id="60753"/>
+    <path
+            d="M929.493 962c-19.472 0-35.257-13.186-35.257-29.444 0-220.505-170.843-399.911-380.852-399.911S132.512 712.051 132.512 932.556c0 16.258-15.785 29.444-35.257 29.444s-35.257-13.186-35.257-29.444c0-253.012 202.474-458.769 451.375-458.769s451.385 205.757 451.385 458.769c0 16.258-15.795 29.444-35.267 29.444z"
+            fill="currentColor"
+            stroke="currentColor"
+            stroke-width="20"
+            p-id="60754"/>
+</svg>

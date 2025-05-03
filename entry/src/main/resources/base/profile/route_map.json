@@ -1,0 +1,22 @@
+{
+  "routerMap": [
+    {
+      "name": "Advertisement",
+      "pageSourceFile": "src/main/ets/pages4/Advertisement.ets",
+      "buildFunction": "Advertisement_Builder",
+      "data": {
+        "description" : "this is Advertisement"
+      }
+    },
+    {
+      "name": "Layout",
+      "pageSourceFile": "src/main/ets/pages4/Layout.ets",
+      "buildFunction": "Layout_Builder",
+      "data": {
+        "description" : "this is Layout"
+      }
+    }
+
+
+  ]
+}

@@ -1,0 +1,90 @@
+export class ChartDateClass {
+  type: string
+  title: string
+  color: string
+  data: number[]
+  constructor(type: string, title: string, color: string, data: number[]) {
+    this.type = type
+    this.title = title
+    this.color = color
+    this.data = data
+  }
+}
+
+export class SleepClass{
+  date:string
+  sleep:number
+  wake:number
+  deep:number
+  light:number
+  rem:number
+
+  constructor(date: string = "default", sleep: number = 0,wake:number=0,deep:number=0,light:number=0,rem:number=0) {
+    this.date = date
+    this.sleep = sleep
+    this.wake=wake
+    this.deep=deep
+    this.light=light
+    this.rem=rem
+ }
+}
+
+export class StepClass{
+  date:string
+  step:number
+  distance:number
+  calorie:number
+
+  constructor(date: string = "default", step: number = 0, distance: number = 0, calorie: number = 0) {
+    this.date = date
+    this.step = step
+    this.distance = distance
+    this.calorie = calorie
+  }
+}
+
+export class TabClass{
+  text:string=""
+  icon:ResourceStr=""
+}
+export const tabData:TabClass[]=[
+  {text:'健康',icon:$r('app.media.heart')}
+  ,{text:'数据',icon:$r('app.media.ic_find')}
+  ,{text:'我的',icon:$r('app.media.ic_mine')}
+]
+
+export class  TargetClass{
+  step_target:number
+  distance_target:number
+  calorie_target:number
+  sleep_target:number
+  deep_target:number
+  light_target:number
+  rem_target:number
+  water_target:number
+  water_interval:number
+
+  constructor(step: number = 0, dist: number = 0, cal: number = 0, sleep: number = 0,
+    deep: number = 0, light: number = 0, rem: number = 0, water: number = 0,interval:number=10)
+  {
+    this.step_target = step
+    this.distance_target = dist
+    this.calorie_target = cal
+    this.sleep_target = sleep
+    this.deep_target = deep
+    this.light_target = light
+    this.rem_target = rem
+    this.water_target = water
+    this.water_interval = interval
+  }
+}
+
+export class WaterClass{
+  date:string
+  water:number
+
+  constructor(date: string = "default", water: number = 0) {
+    this.date = date
+    this.water = water
+  }
+}

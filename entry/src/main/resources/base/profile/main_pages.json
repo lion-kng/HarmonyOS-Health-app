@@ -1,0 +1,15 @@
+{
+  "src": [
+    "pages/Index",
+    "pages4/Recommend",
+    "pages5/router_page",
+    "pages4/Moment",
+    "tabPages/Health",
+    "tabPages/DataPage",
+    "tabPages/Mine1",
+    "pages/Main",
+    "tabPages/report_step",
+    "tabPages/report_sleep",
+    "tabPages/report_water"
+  ]
+}
