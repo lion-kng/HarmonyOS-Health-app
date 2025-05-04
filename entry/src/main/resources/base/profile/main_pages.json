@@ -1,9 +1,5 @@
 {
   "src": [
-    "pages/Index",
-    "pages4/Recommend",
-    "pages5/router_page",
-    "pages4/Moment",
     "tabPages/Health",
     "tabPages/DataPage",
     "tabPages/Mine1",

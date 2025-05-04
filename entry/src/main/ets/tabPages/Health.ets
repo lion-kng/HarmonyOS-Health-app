@@ -48,7 +48,7 @@ export struct Health {
   @StorageLink('water_info') @Watch('onDataChange') water_info: WaterClass = new WaterClass();
   @StorageLink('water_cup') water_cup: number = -1;
   @State water_interval: number = 500;  // 饮水杯容量
-  @StorageLink('target_info') target_info: TargetClass = new TargetClass();
+  @StorageLink('target_info') @Watch('onDataChange') target_info: TargetClass = new TargetClass();
 
   // 动画进度值
   @State animatedStepProgress: number = 0;   // 步数动画进度
