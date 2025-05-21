@@ -140,20 +140,37 @@ export class DataService {
       throw new Error("[test]数据库未创建，无法建表");
     }
 
+  //   // 建表SQL语句
+  //   const createTableSql = `
+  // CREATE TABLE IF NOT EXISTS target_table (
+  //   id INTEGER PRIMARY KEY AUTOINCREMENT,  // 主键
+  //   step_target INTEGER DEFAULT 0,         // 步数目标（单位：步）
+  //   distance_target REAL DEFAULT 0.0,      // 距离目标（单位：千米）
+  //   calorie_target INTEGER DEFAULT 0,       // 卡路里目标（单位：千卡）
+  //   sleep_target INTEGER DEFAULT 0,         // 总睡眠目标（单位：分钟）
+  //   deep_target INTEGER DEFAULT 0,          // 深度睡眠目标（单位：分钟）
+  //   light_target INTEGER DEFAULT 0,         // 浅度睡眠目标（单位：分钟）
+  //   rem_target INTEGER DEFAULT 0,           // REM睡眠目标（单位：分钟）
+  //   water_target INTEGER DEFAULT 0,         // 饮水目标（单位：毫升）
+  //   water_interval INTEGER DEFAULT 10       // 杯子容量
+  // )`;
+
     // 建表SQL语句
     const createTableSql = `
   CREATE TABLE IF NOT EXISTS target_table (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,  // 主键
-    step_target INTEGER DEFAULT 0,         // 步数目标（单位：步）
-    distance_target REAL DEFAULT 0.0,      // 距离目标（单位：千米）
-    calorie_target INTEGER DEFAULT 0,       // 卡路里目标（单位：千卡）
-    sleep_target INTEGER DEFAULT 0,         // 总睡眠目标（单位：分钟）
-    deep_target INTEGER DEFAULT 0,          // 深度睡眠目标（单位：分钟）
-    light_target INTEGER DEFAULT 0,         // 浅度睡眠目标（单位：分钟）
-    rem_target INTEGER DEFAULT 0,           // REM睡眠目标（单位：分钟）
-    water_target INTEGER DEFAULT 0,         // 饮水目标（单位：毫升）
-    water_interval INTEGER DEFAULT 10       // 杯子容量
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    step_target INTEGER DEFAULT 0,
+    distance_target REAL DEFAULT 0.0,
+    calorie_target INTEGER DEFAULT 0,
+    sleep_target INTEGER DEFAULT 0,
+    deep_target INTEGER DEFAULT 0,
+    light_target INTEGER DEFAULT 0,
+    rem_target INTEGER DEFAULT 0,
+    water_target INTEGER DEFAULT 0,
+    water_interval INTEGER DEFAULT 10
   )`;
+
+
 
     try {
       // 执行建表操作
@@ -176,13 +193,21 @@ export class DataService {
       throw new Error("[test]数据库未创建，无法建表");
     }
 
+  //   // 建表SQL语句
+  //   const sql_creat = `CREATE TABLE IF NOT EXISTS step_table (
+  //   id INTEGER PRIMARY KEY AUTOINCREMENT,  // 主键
+  //   date TEXT NOT NULL UNIQUE,            // 日期标识（格式：YYYY-MM-DD）
+  //   step INTEGER DEFAULT 0,               // 步数（单位：步）
+  //   distance REAL DEFAULT 0.0,            // 距离（单位：千米）
+  //   calorie INTEGER DEFAULT 0             // 卡路里（单位：千卡）
+  // )`;
     // 建表SQL语句
     const sql_creat = `CREATE TABLE IF NOT EXISTS step_table (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,  // 主键
-    date TEXT NOT NULL UNIQUE,            // 日期标识（格式：YYYY-MM-DD）
-    step INTEGER DEFAULT 0,               // 步数（单位：步）
-    distance REAL DEFAULT 0.0,            // 距离（单位：千米）
-    calorie INTEGER DEFAULT 0             // 卡路里（单位：千卡）
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT NOT NULL UNIQUE,
+    step INTEGER DEFAULT 0,
+    distance REAL DEFAULT 0.0,
+    calorie INTEGER DEFAULT 0
   )`;
 
     try {
@@ -206,15 +231,26 @@ export class DataService {
       throw new Error("数据库未创建，无法建表");
     }
 
+  //   // 建表SQL语句
+  //   const sql_creat = `CREATE TABLE IF NOT EXISTS sleep_table (
+  //   id INTEGER PRIMARY KEY AUTOINCREMENT,  // 主键
+  //   date TEXT NOT NULL UNIQUE,            // 日期标识（格式：YYYY-MM-DD）
+  //   sleep INTEGER DEFAULT 0,              // 睡眠总时长（单位：分钟）
+  //   wake INTEGER DEFAULT 0,               // 清醒次数
+  //   deep INTEGER DEFAULT 0,               // 深度睡眠时长（单位：分钟）
+  //   light INTEGER DEFAULT 0,              // 浅度睡眠时长（单位：分钟）
+  //   rem INTEGER DEFAULT 0                 // REM睡眠时长（单位：分钟）
+  // )`;
+
     // 建表SQL语句
     const sql_creat = `CREATE TABLE IF NOT EXISTS sleep_table (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,  // 主键
-    date TEXT NOT NULL UNIQUE,            // 日期标识（格式：YYYY-MM-DD）
-    sleep INTEGER DEFAULT 0,              // 睡眠总时长（单位：分钟）
-    wake INTEGER DEFAULT 0,               // 清醒次数
-    deep INTEGER DEFAULT 0,               // 深度睡眠时长（单位：分钟）
-    light INTEGER DEFAULT 0,              // 浅度睡眠时长（单位：分钟）
-    rem INTEGER DEFAULT 0                 // REM睡眠时长（单位：分钟）
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT NOT NULL UNIQUE,
+    sleep INTEGER DEFAULT 0,
+    wake INTEGER DEFAULT 0,
+    deep INTEGER DEFAULT 0,
+    light INTEGER DEFAULT 0,
+    rem INTEGER DEFAULT 0
   )`;
 
     try {
@@ -238,11 +274,18 @@ export class DataService {
       throw new Error("数据库未创建，无法建表");
     }
 
+  //   // 建表SQL语句
+  //   const sql_creat = `CREATE TABLE IF NOT EXISTS water_table (
+  //   id INTEGER PRIMARY KEY AUTOINCREMENT,  // 主键
+  //   date TEXT NOT NULL UNIQUE,            // 日期标识（格式：YYYY-MM-DD）
+  //   water INTEGER DEFAULT 0               // 当日饮水量（单位：毫升）
+  // )`;
+
     // 建表SQL语句
     const sql_creat = `CREATE TABLE IF NOT EXISTS water_table (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,  // 主键
-    date TEXT NOT NULL UNIQUE,            // 日期标识（格式：YYYY-MM-DD）
-    water INTEGER DEFAULT 0               // 当日饮水量（单位：毫升）
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT NOT NULL UNIQUE,
+    water INTEGER DEFAULT 0
   )`;
 
     try {
@@ -584,13 +627,17 @@ export class DataService {
     const waterInfo = new WaterClass();  // 初始化默认数据
 
     // 检查数据库连接
-    if (!this.store) return waterInfo;  // 数据库未初始化返回空对象
+    if (!this.store) {
+      console.error('[饮水数据] 数据库未初始化');
+      return waterInfo; // 数据库未初始化返回空对象
 
+    }
     try {
       // 构建日期查询条件
       const predicates = new relationalStore.RdbPredicates("water_table");
       predicates.equalTo("date", today);  // 按日期查询
 
+      console.info(`[饮水数据] 构建查询条件: ${JSON.stringify(predicates)}`);
       // 执行全字段查询
       const resultSet = await this.store.query(predicates, ["*"]);
 
@@ -811,14 +858,17 @@ export class DataService {
       // 构建查询条件
       const predicates = new relationalStore.RdbPredicates("water_table");
       predicates.equalTo("date", today);
+      console.info(`[饮水数据] 构建查询条件: ${JSON.stringify(predicates)}`);
 
       // 构建更新数据集
       const valueBucket: relationalStore.ValuesBucket = {
         "water": validatedWater
       };
 
+      console.info(`[饮水数据] 构建更新数据集: ${JSON.stringify(valueBucket)}`);
       // 执行更新
       const affectedRows = await this.store.update(valueBucket, predicates);
+      console.info(`[饮水数据] 执行更新，影响行数: ${affectedRows}`);
 
       // 处理更新结果
       if (affectedRows === 0) {

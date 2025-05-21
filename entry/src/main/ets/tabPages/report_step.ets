@@ -381,49 +381,45 @@ struct Report_step {
    * @param canvasWidth 画布宽度
    * @param canvasHeight 画布高度
    */
-  private drawDateLabels(
-    ctx: CanvasRenderingContext2D,
-    data: StepClass[],
-    color: string,
-    canvasWidth: number,
-    canvasHeight: number
-  ): void {
-    ctx.save(); // 保存画布状态
+  // 日期标签绘制
+  private drawDateLabels(ctx: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number) {
+    // 布局参数
+    const margin = 30
+    const totalBars = 7
+    const availableWidth = canvasWidth - margin * 2
+    const barWidth = Math.min(40, availableWidth / (totalBars * 1.5)) // 柱宽计算
+    const spacing = barWidth / 2 // 间距计算
+    const verticalPadding = 40 // 与柱状图绘制保持一致
 
-    // 计算布局参数
-    const totalBars = data.length;
-    const margin = 20;
-    const availableWidth = canvasWidth - margin * 2;
-    const barWidth = Math.min(40, availableWidth / (totalBars * 1.5)); // 最大40px
-    const spacing = barWidth / 2;
+    // 动态字体大小
+    const baseSize = canvasWidth / 20
+    const fontSize = Math.max(48, Math.min(72, baseSize * 3))
+    ctx.font = `${fontSize}px \"HarmonyOS Sans\"`
 
-    // 字体大小设置（与数据标签保持一致）
-    const baseSize = canvasWidth / 20;
-    const fontSize = Math.max(48, Math.min(72, baseSize * 3));
-    ctx.font = `${fontSize}px \"HarmonyOS Sans\"`; // 字体设置
-    ctx.textBaseline = 'top'; // 文字基线对齐顶部
-    ctx.textAlign = 'center'; // 水平居中
-    ctx.fillStyle = Color.Black; // 黑色文字
+    // 文字样式
+    ctx.fillStyle = Color.Black // 黑色文字
+    ctx.textBaseline = 'top' // 顶部对齐
+    ctx.textAlign = 'center' // 居中对齐
 
-    data.forEach((item, i) => {
-      if (!item?.date) return; // 跳过无效日期
-
+    // 遍历数据集绘制日期标签
+    this.step_info_week.forEach((item, i) => {
       // 计算X坐标（柱中心）
-      const x = margin + i * (barWidth + spacing) + barWidth / 2;
+      const x = margin + i * (barWidth + spacing) + barWidth / 2
 
-      // 计算Y坐标（画布底部上方15px）
-      const verticalPadding = 15;
-      const dateY = canvasHeight - verticalPadding;
+      // 解析日期
+      const date = new Date(item.date)
 
-      // 提取并格式化日期（去除前导零）
-      const day = item.date.split('-')[2];
-      const dayPart = day.startsWith('0') ? day[1] : day;
+      // 计算标签位置（柱底下方）
+      const labelY = canvasHeight - (verticalPadding-25)
 
-      // 绘制日期文本
-      ctx.fillText(dayPart, x, dateY);
-    });
+      // 格式化日期显示
+      const day = date.getDate().toString().padStart(2, ' ') // 日期补零
+      const month = this.monthAbbreviations[date.getMonth()] // 月份缩写
 
-    ctx.restore(); // 恢复画布状态
+      // 绘制日期标签
+      ctx.fillText(`${day}`, x, labelY) // 日期（居中）
+      // ctx.fillText(`${month}`, x, labelY + 18) // 月份（已注释）
+    })
   }
 
   /**
@@ -648,13 +644,7 @@ struct Report_step {
     );
 
     // 绘制日期标签
-    this.drawDateLabels(
-      ctx,
-      this.step_info_week,
-      this.step_data_set.color,
-      canvasWidth,
-      canvasHeight
-    );
+    this.drawDateLabels(ctx, canvasWidth, canvasHeight);
   }
 
 

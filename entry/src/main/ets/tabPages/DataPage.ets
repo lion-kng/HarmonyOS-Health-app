@@ -315,6 +315,21 @@ export struct Data_page {
                             this.show_notify[1]=true  // 标记已通知
                           }
                         }
+
+                        //如果深睡、浅睡、REM都为0，就置为3：5：2
+                        if(this.sleep_info.deep==0&&this.sleep_info.light==0&&this.sleep_info.rem==0){
+                          this.sleep_info.deep=Math.floor (0.3*this.sleep_info.sleep)
+                          this.sleep_info.light=Math.floor (0.5*this.sleep_info.sleep)
+                          this.sleep_info.rem=Math.floor(0.2*this.sleep_info.sleep)
+                          this.deep_sleep_hours=Math.floor(this.sleep_info.deep/60)
+                          this.light_sleep_hours=Math.floor(this.sleep_info.light/60)
+                          this.rem_sleep_hours=Math.floor(this.sleep_info.rem/60)
+                          this.deep_sleep_minutes=this.sleep_info.deep%60
+                          this.light_sleep_minutes=this.sleep_info.light%60
+                          this.rem_sleep_minutes=this.sleep_info.rem%60
+                          await this.data_service.sleep_update_data(this.today, this.sleep_info)
+                        }
+
                       }
                     })
                   })
